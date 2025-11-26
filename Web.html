@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Supply Chain Management System - Enhanced Design</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+  /* Animate form container on load */
+  @keyframes fadeSlideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .bg-white {
+    animation: fadeSlideUp 0.8s ease forwards;
+  }
+
+  /* Input focus glow */
+  input:focus {
+    outline: none;
+    box-shadow: 0 0 8px 2px rgba(34,197,94, 0.6); /* Tailwind green-500 */
+    border-color: #22c55e; /* Tailwind green-500 */
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* Link underline animation */
+  a {
+    position: relative;
+    color: #2563eb; /* Tailwind blue-600 */
+    text-decoration: none;
+  }
+  a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #2563eb;
+    transition: width 0.3s ease;
+  }
+  a:hover::after {
+    width: 100%;
+  }
+
+  /* Floating background circles */
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.3;
+    z-index: -1;
+  }
+  body::before {
+    width: 300px;
+    height: 300px;
+    background: #22c55e; /* green */
+    top: 10%;
+    left: 5%;
+    animation: floatUpDown 6s ease-in-out infinite;
+  }
+  body::after {
+    width: 400px;
+    height: 400px;
+    background: #2563eb; /* blue */
+    bottom: 10%;
+    right: 5%;
+    animation: floatUpDown 8s ease-in-out infinite reverse;
+  }
+  @keyframes floatUpDown {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(20px);
+    }
+  }
+    /* Custom scrollbar for sidebar */
+    .sidebar::-webkit-scrollbar {
+      width: 20px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background-color: rgba(13, 103, 228, 0.751);
+      border-radius: 4px;
+    }
+
+    /* Smooth card hover */
+    .dashboard-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(92, 77, 77, 0.12);
+    }
+
+    /* Sidebar active link */
+    .nav-link.active {
+      background-color: #07aaf5;
+      /* Tailwind blue-800 */
+      color: white;
+    }
+
+    /* Sidebar link hover */
+    .nav-link:hover {
+      background-color: #13e1bf;
+      color: white;
+    }
+
+    /* Sticky header shadow on scroll */
+    header.sticky {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background-color: white;
+    }
+
+    /* Dark mode styles */
+    body.dark {
+      background-color: #5c759c;
+      color: #cbd5e1;
+    }
+
+    body.dark header {
+      background-color: #334155;
+      color: #cbd5e1;
+    }
+
+    body.dark .sidebar {
+      background-color: #0f172a;
+      color: #cbd5e1;
+    }
+
+    body.dark .dashboard-card {
+      background-color: #334155;
+      color: #cbd5e1;
+    }
+
+    body.dark table thead tr {
+      border-bottom-color: #475569;
+    }
+
+    body.dark table tbody tr {
+      border-bottom-color: #475569;
+    }
+
+    body.dark .nav-link.active {
+      background-color: #2563eb;
+      color: white;
+    }
+
+    body.dark .nav-link:hover {
+      background-color: #2563eb;
+      color: white;
+    }
+
+    /* Mobile sidebar overlay */
+    #mobileSidebarOverlay {
+      background-color: rgba(0, 0, 0, 0.4);
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      pointer-events: none;
+    }
+
+    #mobileSidebarOverlay.active {
+      display: block;
+      pointer-events: auto;
+    }
+
+    #mobileSidebar {
+      z-index: 50 !important;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-[#1e293b] dark:text-slate-300">
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside id="sidebar"
+      class="sidebar bg-dark text-white w-64 md:fixed md:h-screen hidden md:block overflow-y-auto md:top-0 md:left-0 md:z-30 md:shadow-lg md:transition-all md:duration-300 md:ease-in-out max-w-full"
+      aria-label="Sidebar Navigation">
+      <div class="p-4 md:p-6 lg:p-8">
+        <div class="flex items-center mb-8">
+          <img
+            src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/bda61d3c-7f33-40cb-acba-af3869728900.png"
+            alt="Supply chain management system logo with interconnected nodes and arrows representing logistics flow"
+            class="mr-3 rounded w-10 h-10" />
+          <h1 class="text-xl font-bold select-none">SCM Pro</h1>
+        </div>
+
+        <nav class="space-y-2" aria-label="Main Navigation">
+          <div class="nav-section">
+            <h3 class="text-sm uppercase text-gray-400 mb-2 select-none">
+              Dashboard
+            </h3>
+            <a href="#dashboard" class="nav-link block py-2 px-4 rounded font-medium nav-link active"><i
+                class="fas fa-tachometer-alt mr-3"></i>Overview</a>
+          </div>
+
+          <div class="nav-section mt-6">
+            <h3 class="text-sm uppercase text-gray-400 mb-2 select-none">
+              Operations
+            </h3>
+            <a href="#procurement"
+              class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white"><i
+                class="fas fa-shopping-cart mr-3"></i>Procurement</a>
+
+            <p id="formMessage" class="mt-2 text-sm"></p>
+            <!-- Add Order Section -->
+
+            </section>
+
+            <button id="openInventoryModal" type="button"
+              class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white w-full text-left"><i
+                class="fas fa-warehouse mr-3"></i>Inventory</button>
+            <!-- Inventory Modal -->
+            <div id="inventoryModal"
+              class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+              <div class="bg-white dark:bg-[#334155] rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+                <button id="closeInventoryModal"
+                  class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+                <h2 class="text-xl font-bold mb-4">Inventory Table</h2>
+                <div id="inventoryTableContainer" class="overflow-x-auto"></div>
+              </div>
+            </div>
+            <script>
+              // Inventory Modal Logic
+              const openInventoryModalBtn = document.getElementById('openInventoryModal');
+              const inventoryModal = document.getElementById('inventoryModal');
+              const closeInventoryModalBtn = document.getElementById('closeInventoryModal');
+              const inventoryTableContainer = document.getElementById('inventoryTableContainer');
+
+              openInventoryModalBtn.addEventListener('click', async () => {
+                inventoryModal.classList.remove('hidden');
+                await loadInventoryTable();
+              });
+              closeInventoryModalBtn.addEventListener('click', () => {
+                inventoryModal.classList.add('hidden');
+              });
+              inventoryModal.addEventListener('click', (e) => {
+                if (e.target === inventoryModal) inventoryModal.classList.add('hidden');
+              });
+
+              let inventoryData = [];
+              let editingInventoryId = null;
+              async function loadInventoryTable() {
+                inventoryTableContainer.innerHTML = '<div class="text-center py-4">Loading...</div>';
+                try {
+                  const res = await fetch('http://localhost:3001/api/inventory');
+                  const data = await res.json();
+                  inventoryData = data;
+                  if (!Array.isArray(data) || data.length === 0) {
+                    inventoryTableContainer.innerHTML = '<div class="text-center py-4">No inventory data found.</div>';
+                    return;
+                  }
+                  let table = '<table class="min-w-full text-sm text-left"><thead><tr>';
+                  for (const key of Object.keys(data[0])) {
+                    table += `<th class="px-4 py-2 border-b font-bold">${key.replace(/_/g, ' ')}</th>`;
+                  }
+                  table += '<th class="px-4 py-2 border-b font-bold">Edit</th></tr></thead><tbody>';
+                  for (const row of data) {
+                    table += '<tr>';
+                    for (const key of Object.keys(row)) {
+                      table += `<td class="px-4 py-2 border-b">${row[key]}</td>`;
+                    }
+                    table += `<td class="px-4 py-2 border-b"><button class="edit-inventory-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${row.inventory_id}">Edit</button></td>`;
+                    table += '</tr>';
+                  }
+                  table += '</tbody></table>';
+                  table += '<div id="inventoryEditFormContainer"></div>';
+                  inventoryTableContainer.innerHTML = table;
+
+                  // Attach event listeners to edit buttons
+                  document.querySelectorAll('.edit-inventory-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                      const id = e.target.getAttribute('data-id');
+                      showEditInventoryForm(id);
+                    });
+                  });
+                } catch (err) {
+                  inventoryTableContainer.innerHTML = '<div class="text-center py-4 text-red-500">Failed to load inventory.</div>';
+                }
+              }
+
+              function showEditInventoryForm(id) {
+                const row = inventoryData.find(r => String(r.inventory_id) === String(id));
+                if (!row) return;
+                editingInventoryId = id;
+                const formHtml = `
+                  <form id="inventoryEditForm" class="mt-4 bg-gray-100 dark:bg-[#475569] p-4 rounded shadow">
+                    <div class="mb-2">
+                      <label class="block mb-1 font-medium">Warehouse</label>
+                      <input type="text" id="editWarehouse" value="${row.warehouse}" class="border rounded px-3 py-1 w-full" required />
+                    </div>
+                    <div class="mb-2">
+                      <label class="block mb-1 font-medium">Quantity</label>
+                      <input type="number" id="editQuantity" value="${row.quantity}" min="0" class="border rounded px-3 py-1 w-full" required />
+                    </div>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Update</button>
+                    <button type="button" id="cancelEditInventory" class="ml-2 px-4 py-2 rounded bg-gray-400 text-white">Cancel</button>
+                    <div id="inventoryEditMsg" class="mt-2 text-sm"></div>
+                  </form>
+                `;
+                document.getElementById('inventoryEditFormContainer').innerHTML = formHtml;
+                document.getElementById('inventoryEditForm').addEventListener('submit', submitEditInventoryForm);
+                document.getElementById('cancelEditInventory').addEventListener('click', () => {
+                  document.getElementById('inventoryEditFormContainer').innerHTML = '';
+                });
+              }
+
+              async function submitEditInventoryForm(e) {
+                e.preventDefault();
+                const warehouse = document.getElementById('editWarehouse').value;
+                const quantity = document.getElementById('editQuantity').value;
+                const msgDiv = document.getElementById('inventoryEditMsg');
+                msgDiv.textContent = 'Updating...';
+                try {
+                  const res = await fetch(`http://localhost:3001/api/inventory/${editingInventoryId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ warehouse, quantity })
+                  });
+                  const data = await res.json();
+                  if (res.ok) {
+                    msgDiv.textContent = 'Inventory updated!';
+                    await loadInventoryTable();
+                  } else {
+                    msgDiv.textContent = data.error || 'Failed to update.';
+                  }
+                } catch (err) {
+                  msgDiv.textContent = 'Failed to update.';
+                }
+              }
+
+            </script>
+            <button id="openSuppliersModal" type="button"
+              class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white w-full text-left"><i
+                class="fas fa-truck-loading mr-3"></i>Suppliers</button>
+          </div>
+
+          <div class="nav-section mt-6">
+            <h3 class="text-sm uppercase text-gray-400 mb-2 select-none">
+              Logistics
+            </h3>
+            <button id="openOrdersModal" type="button"
+              class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white w-full text-left"><i
+                class="fas fa-clipboard-list mr-3"></i>Orders</button>
+            <!-- Suppliers Modal -->
+            <div id="suppliersModal"
+              class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+              <div class="bg-white dark:bg-[#334155] rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+                <button id="closeSuppliersModal"
+                  class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+                <h2 class="text-xl font-bold mb-4">Suppliers Table</h2>
+                <div id="suppliersTableContainer" class="overflow-x-auto"></div>
+              </div>
+            </div>
+
+            <!-- Orders Modal -->
+            <div id="ordersModal"
+              class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+              <div class="bg-white dark:bg-[#334155] rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+                <button id="closeOrdersModal"
+                  class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+                <h2 class="text-xl font-bold mb-4">Orders Table</h2>
+                <div id="ordersTableContainer" class="overflow-x-auto"></div>
+              </div>
+            </div>
+            <script>
+              // Suppliers Modal Logic
+              const openSuppliersModalBtn = document.getElementById('openSuppliersModal');
+              const suppliersModal = document.getElementById('suppliersModal');
+              const closeSuppliersModalBtn = document.getElementById('closeSuppliersModal');
+              const suppliersTableContainer = document.getElementById('suppliersTableContainer');
+              let suppliersData = [];
+              let editingSupplierId = null;
+              openSuppliersModalBtn.addEventListener('click', async () => {
+                suppliersModal.classList.remove('hidden');
+                await loadSuppliersTable();
+              });
+              closeSuppliersModalBtn.addEventListener('click', () => {
+                suppliersModal.classList.add('hidden');
+              });
+              suppliersModal.addEventListener('click', (e) => {
+                if (e.target === suppliersModal) suppliersModal.classList.add('hidden');
+              });
+
+              async function loadSuppliersTable() {
+                suppliersTableContainer.innerHTML = '<div class="text-center py-4">Loading...</div>';
+                try {
+                  const res = await fetch('http://localhost:3001/api/suppliers');
+                  const data = await res.json();
+                  suppliersData = data;
+                  if (!Array.isArray(data) || data.length === 0) {
+                    suppliersTableContainer.innerHTML = '<div class="text-center py-4">No suppliers found.</div>';
+                    return;
+                  }
+                  let table = '<table class="min-w-full text-sm text-left"><thead><tr>';
+                  for (const key of Object.keys(data[0])) {
+                    table += `<th class="px-4 py-2 border-b font-bold">${key.replace(/_/g, ' ')}</th>`;
+                  }
+                  table += '<th class="px-4 py-2 border-b font-bold">Edit</th></tr></thead><tbody>';
+                  for (const row of data) {
+                    table += '<tr>';
+                    for (const key of Object.keys(row)) {
+                      table += `<td class="px-4 py-2 border-b">${row[key]}</td>`;
+                    }
+                    table += `<td class="px-4 py-2 border-b"><button class="edit-supplier-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${row.supplier_id}">Edit</button></td>`;
+                    table += '</tr>';
+                  }
+                  table += '</tbody></table>';
+                  table += '<div id="supplierEditFormContainer"></div>';
+                  suppliersTableContainer.innerHTML = table;
+
+                  document.querySelectorAll('.edit-supplier-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                      const id = e.target.getAttribute('data-id');
+                      showEditSupplierForm(id);
+                    });
+                  });
+                } catch (err) {
+                  suppliersTableContainer.innerHTML = '<div class="text-center py-4 text-red-500">Failed to load suppliers.</div>';
+                }
+              }
+
+              function showEditSupplierForm(id) {
+                const row = suppliersData.find(r => String(r.supplier_id) === String(id));
+                if (!row) return;
+                editingSupplierId = id;
+                const formHtml = `
+        <form id="supplierEditForm" class="mt-4 bg-gray-100 dark:bg-[#475569] p-4 rounded shadow">
+          <div class="mb-2">
+            <label class="block mb-1 font-medium">Name</label>
+            <input type="text" id="editSupplierName" value="${row.name || ''}" class="border rounded px-3 py-1 w-full" required />
+          </div>
+          <div class="mb-2">
+            <label class="block mb-1 font-medium">Contact Info</label>
+            <input type="text" id="editSupplierContact" value="${row.contact_info || ''}" class="border rounded px-3 py-1 w-full" required />
+          </div>
+          <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Update</button>
+          <button type="button" id="cancelEditSupplier" class="ml-2 px-4 py-2 rounded bg-gray-400 text-white">Cancel</button>
+          <div id="supplierEditMsg" class="mt-2 text-sm"></div>
+        </form>
+      `;
+                document.getElementById('supplierEditFormContainer').innerHTML = formHtml;
+                document.getElementById('supplierEditForm').addEventListener('submit', submitEditSupplierForm);
+                document.getElementById('cancelEditSupplier').addEventListener('click', () => {
+                  document.getElementById('supplierEditFormContainer').innerHTML = '';
+                });
+              }
+
+              async function submitEditSupplierForm(e) {
+                e.preventDefault();
+                const name = document.getElementById('editSupplierName').value;
+                const contact_info = document.getElementById('editSupplierContact').value;
+                const msgDiv = document.getElementById('supplierEditMsg');
+                msgDiv.textContent = 'Updating...';
+                try {
+                  const res = await fetch(`http://localhost:3001/api/suppliers/${editingSupplierId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, contact_info })
+                  });
+                  const data = await res.json();
+                  if (res.ok) {
+                    msgDiv.textContent = 'Supplier updated!';
+                    await loadSuppliersTable();
+                  } else {
+                    msgDiv.textContent = data.error || 'Failed to update.';
+                  }
+                } catch (err) {
+                  msgDiv.textContent = 'Failed to update.';
+                }
+              }
+
+              // Orders Modal Logic
+              const openOrdersModalBtn = document.getElementById('openOrdersModal');
+              const ordersModal = document.getElementById('ordersModal');
+              const closeOrdersModalBtn = document.getElementById('closeOrdersModal');
+              const ordersTableContainer = document.getElementById('ordersTableContainer');
+              let ordersData = [];
+              openOrdersModalBtn.addEventListener('click', async () => {
+                ordersModal.classList.remove('hidden');
+                await loadOrdersTable();
+              });
+              closeOrdersModalBtn.addEventListener('click', () => {
+                ordersModal.classList.add('hidden');
+              });
+              ordersModal.addEventListener('click', (e) => {
+                if (e.target === ordersModal) ordersModal.classList.add('hidden');
+              });
+
+              async function loadOrdersTable() {
+                ordersTableContainer.innerHTML = '<div class="text-center py-4">Loading...</div>';
+                try {
+                  const res = await fetch('http://localhost:3001/api/orders');
+                  const data = await res.json();
+                  ordersData = data;
+                  if (!Array.isArray(data) || data.length === 0) {
+                    ordersTableContainer.innerHTML = '<div class="text-center py-4">No orders found.</div>';
+                    return;
+                  }
+                  let table = '<table class="min-w-full text-sm text-left"><thead><tr>';
+                  for (const key of Object.keys(data[0])) {
+                    table += `<th class="px-4 py-2 border-b font-bold">${key.replace(/_/g, ' ')}</th>`;
+                  }
+                  table += '</tr></thead><tbody>';
+                  for (const row of data) {
+                    table += '<tr>';
+                    for (const key of Object.keys(row)) {
+                      table += `<td class="px-4 py-2 border-b">${row[key]}</td>`;
+                    }
+                    table += '</tr>';
+                  }
+                  table += '</tbody></table>';
+                  ordersTableContainer.innerHTML = table;
+                } catch (err) {
+                  ordersTableContainer.innerHTML = '<div class="text-center py-4 text-red-500">Failed to load orders.</div>';
+                }
+              }
+            </script>
+            <button id="openShipmentsModal" type="button"
+              class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white w-full text-left"><i
+                class="fas fa-shipping-fast mr-3"></i>Shipments</button>
+            <button id="openWarehousesModal" type="button"
+              class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white w-full text-left"><i
+                class="fas fa-building mr-3"></i>Warehouses</button>
+            <!-- Warehouses Modal -->
+            <div id="warehousesModal"
+              class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+              <div class="bg-white dark:bg-[#334155] rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+                <button id="closeWarehousesModal"
+                  class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+                <h2 class="text-xl font-bold mb-4">Warehouses Table</h2>
+                <div id="warehousesTableContainer" class="overflow-x-auto"></div>
+              </div>
+            </div>
+            <script>
+              // Warehouses Modal Logic
+              const openWarehousesModalBtn = document.getElementById('openWarehousesModal');
+              const warehousesModal = document.getElementById('warehousesModal');
+              const closeWarehousesModalBtn = document.getElementById('closeWarehousesModal');
+              const warehousesTableContainer = document.getElementById('warehousesTableContainer');
+              let warehousesData = [];
+              let editingWarehouseId = null;
+              openWarehousesModalBtn.addEventListener('click', async () => {
+                warehousesModal.classList.remove('hidden');
+                await loadWarehousesTable();
+              });
+              closeWarehousesModalBtn.addEventListener('click', () => {
+                warehousesModal.classList.add('hidden');
+              });
+              warehousesModal.addEventListener('click', (e) => {
+                if (e.target === warehousesModal) warehousesModal.classList.add('hidden');
+              });
+
+              async function loadWarehousesTable() {
+                warehousesTableContainer.innerHTML = '<div class="text-center py-4">Loading...</div>';
+                try {
+                  const res = await fetch('http://localhost:3001/api/warehouses');
+                  const data = await res.json();
+                  warehousesData = data;
+                  if (!Array.isArray(data) || data.length === 0) {
+                    warehousesTableContainer.innerHTML = '<div class="text-center py-4">No warehouses found.</div>';
+                    return;
+                  }
+                  let table = '<table class="min-w-full text-sm text-left"><thead><tr>';
+                  table += '<th class="px-4 py-2 border-b font-bold">Warehouse</th>';
+                  table += '<th class="px-4 py-2 border-b font-bold">Item Count</th>';
+                  table += '</tr></thead><tbody>';
+                  for (const row of data) {
+                    table += '<tr>';
+                    table += `<td class="px-4 py-2 border-b">${row.warehouse}</td>`;
+                    table += `<td class="px-4 py-2 border-b">${row.item_count}</td>`;
+                    table += '</tr>';
+                  }
+                  table += '</tbody></table>';
+                  warehousesTableContainer.innerHTML = table;
+                } catch (err) {
+                  warehousesTableContainer.innerHTML = '<div class="text-center py-4 text-red-500">Failed to load warehouses.</div>';
+                }
+              }
+
+              function showEditWarehouseForm(id) {
+                const row = warehousesData.find(r => String(r.warehouse_id) === String(id));
+                if (!row) return;
+                editingWarehouseId = id;
+                const formHtml = `
+        <form id="warehouseEditForm" class="mt-4 bg-gray-100 dark:bg-[#475569] p-4 rounded shadow">
+          <div class="mb-2">
+            <label class="block mb-1 font-medium">Name</label>
+            <input type="text" id="editWarehouseName" value="${row.name || ''}" class="border rounded px-3 py-1 w-full" required />
+          </div>
+          <div class="mb-2">
+            <label class="block mb-1 font-medium">Location</label>
+            <input type="text" id="editWarehouseLocation" value="${row.location || ''}" class="border rounded px-3 py-1 w-full" required />
+          </div>
+          <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Update</button>
+          <button type="button" id="cancelEditWarehouse" class="ml-2 px-4 py-2 rounded bg-gray-400 text-white">Cancel</button>
+          <div id="warehouseEditMsg" class="mt-2 text-sm"></div>
+        </form>
+      `;
+                document.getElementById('warehouseEditFormContainer').innerHTML = formHtml;
+                document.getElementById('warehouseEditForm').addEventListener('submit', submitEditWarehouseForm);
+                document.getElementById('cancelEditWarehouse').addEventListener('click', () => {
+                  document.getElementById('warehouseEditFormContainer').innerHTML = '';
+                });
+              }
+
+              async function submitEditWarehouseForm(e) {
+                e.preventDefault();
+                const name = document.getElementById('editWarehouseName').value;
+                const location = document.getElementById('editWarehouseLocation').value;
+                const msgDiv = document.getElementById('warehouseEditMsg');
+                msgDiv.textContent = 'Updating...';
+                try {
+                  const res = await fetch(`http://localhost:3001/api/warehouses/${editingWarehouseId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, location })
+                  });
+                  const data = await res.json();
+                  if (res.ok) {
+                    msgDiv.textContent = 'Warehouse updated!';
+                    await loadWarehousesTable();
+                  } else {
+                    msgDiv.textContent = data.error || 'Failed to update.';
+                  }
+                } catch (err) {
+                  msgDiv.textContent = 'Failed to update.';
+                }
+              }
+            </script>
+            <h2></h2>
+            <ul id="warehousesList"></ul>
+            <script>async function loadWarehouses() {
+                const res = await fetch('http://localhost:3001/api/warehouses');
+                const warehouses = await res.json();
+                const ul = document.getElementById('warehousesList');
+                ul.innerHTML = warehouses.map(wh => `<li>${wh}</li>`).join('');
+              }
+
+              window.onload = () => {
+                loadWarehouses();
+                // call any other load functions you need here...
+              };
+            </script>
+
+          </div>
+
+          <div class="nav-section mt-6">
+            <h3 class="text-sm uppercase text-gray-400 mb-2 select-none">
+              Analytics
+            </h3>
+            <button id="openReportsModal" type="button"
+              class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white w-full text-left"><i
+                class="fas fa-chart-bar mr-3"></i>Reports</button>
+            <button id="openAnalyticsModal" type="button"
+              class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white w-full text-left"><i
+                class="fas fa-chart-line mr-3"></i>Analytics</button>
+            <!-- Shipments Modal -->
+            <div id="shipmentsModal"
+              class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+              <div class="bg-white dark:bg-[#334155] rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+                <button id="closeShipmentsModal"
+                  class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+                <h2 class="text-xl font-bold mb-4">Shipments</h2>
+                <div id="shipmentsTableContainer" class="overflow-x-auto">
+                  <table class="min-w-full text-sm text-left">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Order ID</th>
+                        <th>Shipped Date</th>
+                        <th>Delivery Date</th>
+                        <th>Status</th>
+                        <th>Carrier</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="6" class="text-center py-4">No shipment data (demo placeholder)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reports Modal -->
+            <div id="reportsModal"
+              class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+              <div class="bg-white dark:bg-[#334155] rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+                <button id="closeReportsModal"
+                  class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+                <h2 class="text-xl font-bold mb-4">Reports</h2>
+                <div class="mb-4">Download inventory, orders, or suppliers reports as CSV (demo placeholder)</div>
+                <button class="bg-blue-600 text-white px-4 py-2 rounded">Download Inventory Report</button>
+                <button class="bg-green-600 text-white px-4 py-2 rounded ml-2">Download Orders Report</button>
+              </div>
+            </div>
+
+            <!-- Analytics Modal -->
+            <div id="analyticsModal"
+              class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+              <div class="bg-white dark:bg-[#334155] rounded-lg shadow-lg w-full max-w-3xl p-6 relative">
+                <button id="closeAnalyticsModal"
+                  class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-2xl">&times;</button>
+                <h2 class="text-xl font-bold mb-4">Analytics</h2>
+                <div class="mb-4">Charts and KPIs (demo placeholder)</div>
+                <canvas id="analyticsChart" height="200"></canvas>
+              </div>
+            </div>
+            <script>
+              // Shipments Modal Logic
+              const openShipmentsModalBtn = document.getElementById('openShipmentsModal');
+              const shipmentsModal = document.getElementById('shipmentsModal');
+              const closeShipmentsModalBtn = document.getElementById('closeShipmentsModal');
+              openShipmentsModalBtn.addEventListener('click', () => {
+                shipmentsModal.classList.remove('hidden');
+              });
+              closeShipmentsModalBtn.addEventListener('click', () => {
+                shipmentsModal.classList.add('hidden');
+              });
+              shipmentsModal.addEventListener('click', (e) => {
+                if (e.target === shipmentsModal) shipmentsModal.classList.add('hidden');
+              });
+
+              // Reports Modal Logic
+              const openReportsModalBtn = document.getElementById('openReportsModal');
+              const reportsModal = document.getElementById('reportsModal');
+              const closeReportsModalBtn = document.getElementById('closeReportsModal');
+              openReportsModalBtn.addEventListener('click', () => {
+                reportsModal.classList.remove('hidden');
+              });
+              closeReportsModalBtn.addEventListener('click', () => {
+                reportsModal.classList.add('hidden');
+              });
+              reportsModal.addEventListener('click', (e) => {
+                if (e.target === reportsModal) reportsModal.classList.add('hidden');
+              });
+
+              // Analytics Modal Logic
+              const openAnalyticsModalBtn = document.getElementById('openAnalyticsModal');
+              const analyticsModal = document.getElementById('analyticsModal');
+              const closeAnalyticsModalBtn = document.getElementById('closeAnalyticsModal');
+              openAnalyticsModalBtn.addEventListener('click', () => {
+                analyticsModal.classList.remove('hidden');
+                renderAnalyticsChart();
+              });
+              closeAnalyticsModalBtn.addEventListener('click', () => {
+                analyticsModal.classList.add('hidden');
+              });
+              analyticsModal.addEventListener('click', (e) => {
+                if (e.target === analyticsModal) analyticsModal.classList.add('hidden');
+              });
+
+              // Demo Analytics Chart
+              function renderAnalyticsChart() {
+                const ctx = document.getElementById('analyticsChart').getContext('2d');
+                new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                    datasets: [
+                      { label: 'Orders', data: [12, 19, 3, 5, 2], backgroundColor: 'rgba(59,130,246,0.7)' },
+                      { label: 'Shipments', data: [8, 15, 6, 7, 4], backgroundColor: 'rgba(16,185,129,0.7)' }
+                    ]
+                  }
+                });
+              }
+            </script>
+          </div>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Mobile Sidebar -->
+    <div id="mobileSidebarOverlay" class="" aria-hidden="true" tabindex="-1"></div>
+    <aside id="mobileSidebar"
+      class="fixed inset-y-0 left-0 w-64 max-w-full bg-dark text-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out md:hidden overflow-y-auto md:relative md:translate-x-0 md:shadow-lg"
+      aria-label="Mobile Sidebar Navigation">
+      <div class="p-6">
+        <div class="flex items-center mb-8">
+          <img
+            src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/bda61d3c-7f33-40cb-acba-af3869728900.png"
+            alt="Supply chain management system logo with interconnected nodes and arrows representing logistics flow"
+            class="mr-3 rounded w-10 h-10" />
+          <h1 class="text-xl font-bold select-none">SCM Pro</h1>
+          <button id="closeMobileSidebar" aria-label="Close sidebar"
+            class="ml-auto text-white hover:text-gray-300 focus:outline-none">
+            <i class="fas fa-times text-2xl"></i>
+          </button>
+        </div>
+
+        <nav class="space-y-2" aria-label="Mobile Navigation">
+          <a href="#dashboard" class="nav-link block py-2 px-4 rounded font-medium nav-link active">Overview</a>
+          <a href="#procurement"
+            class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white">Procurement</a>
+          <a href="#inventory" class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white"
+            onclick="handleNavLinkClick('inventory')">Inventory</a>
+          <section>
+            <h2>Inventory Table
+            </h2>
+
+
+            <div id="inventoryTable">
+            </div>
+          </section>
+
+          <!-- Edit Inventory Modal/Section -->
+          <div id="editInventory" style="display:none;">
+            <h3>Edit Inventory</h3>
+            <form id="editInventoryForm">
+              <input type="hidden" id="editInventoryId">
+              <input type="text" id="editWarehouse" placeholder="Warehouse">
+              <input type="number" id="editQuantity" min="0" placeholder="Quantity">
+              <button type="submit">Update</button>
+            </form>
+            <p id="inventoryEditMsg"></p>
+          </div>
+
+          <a href="#suppliers"
+            class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white">Suppliers</a>
+
+          <h2>Suppliers</h2>
+          <div id="suppliersTable"></div>
+
+          <div id="editSupplierSection" style="display:none;">
+            <h3>Edit Supplier</h3>
+            <form id="editSupplierForm">
+              <input type="hidden" id="editSupplierId" />
+              <input type="text" id="editSupplierName" placeholder="Name" required />
+              <input type="text" id="editSupplierContact" placeholder="Contact Info" required />
+              <button type="submit">Update Supplier</button>
+            </form>
+            <p id="supplierEditMessage"></p>
+          </div>
+
+          <a href="#orders"
+            class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white">Orders</a>
+          <h2>Orders</h2>
+          <div id="ordersTable"></div>
+
+          <div id="editOrderSection" style="display:none;">
+            <h3>Edit Order</h3>
+            <form id="editOrderForm">
+              <input type="hidden" id="editOrderId" />
+              <input type="text" id="editOrderCustomer" placeholder="Customer Name" required />
+              <select id="editOrderStatus" required>
+                <option value="Pending">Pending</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Delivered">Delivered</option>
+              </select>
+              <button type="submit">Update Order</button>
+            </form>
+            <p id="orderEditMessage"></p>
+          </div>
+
+          <a href="#shipments"
+            class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white">Shipments</a>
+          <a href="#warehouses"
+            class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white">Warehouses</a>
+          <a href="#reports"
+            class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white">Reports</a>
+          <a href="#forecasting"
+            class="nav-link block py-2 px-4 rounded font-medium hover:bg-blue-900 hover:text-white">Forecasting</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 min-h-screen md:ml-64 flex flex-col">
+      <!-- Header -->
+      <header id="header" class="bg-white dark:bg-[#334155] shadow-sm sticky top-0 z-40 transition-shadow">
+        <div class="flex items-center justify-between p-4 max-w-7xl mx-auto w-full">
+          <div class="flex items-center">
+            <button id="mobileMenuButton" class="md:hidden text-gray-600 dark:text-gray-400 mr-4 focus:outline-none"
+              aria-label="Open sidebar menu">
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-slate-400 select-none">
+              Supply Chain Management Dashboard
+            </h2>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="relative">
+              <input type="text" placeholder="Search..."
+                class="border rounded-full px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-[#475569] dark:border-[#64748b] dark:text-slate-400"
+                aria-label="Search" />
+              <i class="fas fa-search absolute right-3 top-3 text-gray-400 dark:text-gray-400"></i>
+            </div>
+            <button id="darkModeToggle" aria-label="Toggle dark mode"
+              class="text-gray-600 dark:text-gray-400 focus:outline-none" title="Toggle dark mode"
+              onclick="document.body.classList.toggle('dark')">
+              <i class="fas fa-moon text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-2 relative">
+              <button id="notificationsButton" aria-label="Notifications"
+                class="relative text-gray-600 dark:text-gray-400 focus:outline-none">
+                <i class="fas fa-bell text-xl"></i>
+                <span
+                  class="absolute -top-1 -right-1 bg-danger text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">3</span>
+              </button>
+              <!--<img
+                src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/61e81e8e-20be-446e-bc5a-443c1f358db4.png"
+                alt="User  profile picture of supply chain manager with professional attire"
+                class="rounded-full w-10 h-10 select-none"
+              />-->
+            </div>
+          </div>
+        </div>
+        <button id="logoutBtn" class="ml-2 text-red-500 font-medium" style="float: right;">
+          Logout
+        </button>
+
+      </header>
+
+      <!-- Dashboard Content -->
+      <main class="p-6 max-w-7xl mx-auto w-full flex-grow">
+        <!-- KPI Cards -->
+        <section id="dashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          aria-label="Key Performance Indicators">
+          <article class="dashboard-card bg-white dark:bg-[#334155] rounded-lg shadow-md p-6 border-l-4 border-primary"
+            tabindex="0" aria-labelledby="totalOrdersTitle">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-gray-500 dark:text-gray-400">Total Orders</p>
+                <h3 id="totalOrdersTitle" class="text-3xl font-bold text-gray-800 dark:text-slate-300">
+                  1,248
+                </h3>
+                <p class="text-success text-sm flex items-center gap-1">
+                  <i class="fas fa-arrow-up"></i> 12% from last month
+                </p>
+              </div>
+              <div class="bg-primary bg-opacity-10 p-3 rounded-full">
+                <i class="fas fa-clipboard-list text-primary text-xl"></i>
+              </div>
+            </div>
+          </article>
+
+          <article class="dashboard-card bg-white dark:bg-[#334155] rounded-lg shadow-md p-6 border-l-4 border-success"
+            tabindex="0" aria-labelledby="inventoryValueTitle">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-gray-500 dark:text-gray-400">Inventory Value</p>
+                <h3 id="inventoryValueTitle" class="text-3xl font-bold text-gray-800 dark:text-slate-300">
+                  $2.4M
+                </h3>
+                <p class="text-danger text-sm flex items-center gap-1">
+                  <i class="fas fa-arrow-down"></i> 5% from last month
+                </p>
+              </div>
+              <div class="bg-success bg-opacity-10 p-3 rounded-full">
+                <i class="fas fa-boxes text-success text-xl"></i>
+              </div>
+            </div>
+          </article>
+
+          <article class="dashboard-card bg-white dark:bg-[#334155] rounded-lg shadow-md p-6 border-l-4 border-warning"
+            tabindex="0" aria-labelledby="pendingShipmentsTitle">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-gray-500 dark:text-gray-400">Pending Shipments</p>
+                <h3 id="pendingShipmentsTitle" class="text-3xl font-bold text-gray-800 dark:text-slate-300">
+
+                </h3>
+                <p class="text-success text-sm flex items-center gap-1">
+                  <i class="fas fa-arrow-down"></i> 8% from last week
+                </p>
+              </div>
+              <div class="bg-warning bg-opacity-10 p-3 rounded-full">
+                <i class="fas fa-shipping-fast text-warning text-xl"></i>
+              </div>
+            </div>
+          </article>
+
+          <article class="dashboard-card bg-white dark:bg-[#334155] rounded-lg shadow-md p-6 border-l-4 border-danger"
+            tabindex="0" aria-labelledby="supplierPerformanceTitle">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-gray-500 dark:text-gray-400">Supplier Performance</p>
+                <h3 id="supplierPerformanceTitle" class="text-3xl font-bold text-gray-800 dark:text-slate-300">
+                  92%
+                </h3>
+                <p class="text-success text-sm flex items-center gap-1">
+                  <i class="fas fa-arrow-up"></i> 3% from last quarter
+                </p>
+              </div>
+              <div class="bg-danger bg-opacity-10 p-3 rounded-full">
+                <i class="fas fa-chart-line text-danger text-xl"></i>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- Charts and Graphs -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8" aria-label="Charts and Analytics">
+          <section class="bg-white dark:bg-[#334155] rounded-lg shadow-md p-6" aria-labelledby="inventoryTurnoverTitle">
+            <h3 id="inventoryTurnoverTitle" class="text-lg font-semibold mb-4">
+              Inventory Turnover
+            </h3>
+            <canvas id="inventoryTurnoverChart" height="200"></canvas>
+          </section>
+
+          <section class="bg-white dark:bg-[#334155] rounded-lg shadow-md p-6"
+            aria-labelledby="orderShipmentComparisonTitle">
+            <h3 id="orderShipmentComparisonTitle" class="text-lg font-semibold mb-4">
+              Orders vs Shipments
+            </h3>
+            <canvas id="orderShipmentComparisonChart" height="200"></canvas>
+          </section>
+        </section>
+        <!-- Forms for Adding Inventory and Orders -->
+        <section class="mb-8 p-6 bg-white dark:bg-[#334155] rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold mb-4">Add Inventory</h3>
+          <form id="inventoryForm" class="flex flex-col md:flex-row gap-4 items-center">
+            <input id="productId" type="number" placeholder="Product ID" required
+              class="border rounded px-4 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-white dark:border-[#64748b] dark:text-slate-400" />
+            <input id="warehouse" type="text" placeholder="Warehouse" required
+              class="border rounded px-4 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-white dark:border-[#64748b] dark:text-slate-400" />
+            <input id="quantity" type="number" placeholder="Quantity" required min="1"
+              class="border rounded px-4 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-white dark:border-[#64748b] dark:text-slate-400" />
+            <button type="submit" class="bg-primary text-white rounded px-6 py-2 hover:bg-blue-700 transition">
+              Add Inventory
+            </button>
+          </form>
+        </section>
+        <!-- Add Order Form -->
+        <section class="mb-8 p-6 bg-white dark:bg-[#334155] rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold mb-4">Add Order</h3>
+          <form id="orderForm" class="flex flex-col gap-4">
+            <input id="customerName" type="text" placeholder="Customer Name" required
+              class="border rounded px-4 py-2" />
+            <input id="orderDate" type="date" required class="border rounded px-4 py-2" />
+            <input id="status" type="text" placeholder="Status" required class="border rounded px-4 py-2" />
+            <div id="orderProducts" class="flex flex-col gap-2">
+              <div class="flex gap-2">
+                <input type="number" placeholder="Product ID" class="orderProductId border rounded px-2 py-1"
+                  required />
+                <input type="number" placeholder="Quantity" class="orderProductQty border rounded px-2 py-1" required />
+              </div>
+            </div>
+            <button type="button" id="addProductBtn" class="bg-blue-500 text-white px-2 py-1 rounded">Add Another
+              Product</button>
+            <button type="submit" class="bg-primary text-white rounded px-6 py-2 hover:bg-blue-700 transition">Add
+              Order</button>
+          </form>
+          <p id="orderFormMessage" class="mt-2 text-sm"></p>
+        </section>
+        <!--product details and adding-->
+        <section class="mb-8 p-6 bg-white dark:bg-[#334155] rounded-lg shadow-md">
+          <h3 class="text-lg font-semibold mb-4">Product Details</h3>
+          <form id="productForm" class="flex flex-col gap-4">
+            <input id="productName" type="text" placeholder="Product Name" required
+              class="border rounded px-4 py-2" />
+            <input id="productDescription" type="text" placeholder="Product Description" required
+              class="border rounded px-4 py-2" />
+            <input id="productPrice" type="number" placeholder="Product Price" required
+              class="border rounded px-4 py-2" />
+            <input id="productSupplierId" type="number" placeholder="Supplier ID" required
+              class="border rounded px-4 py-2" />
+            <button type="submit" class="bg-primary text-white rounded px-6 py-2 hover:bg-blue-700 transition">Add
+              Product</button>
+          </form>
+          <p id="productFormMessage" class="mt-2 text-sm"></p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="auth.js"></script>
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById("themeToggle");
+    if (themeToggle) {
+      themeToggle.addEventListener("click", () => {
+        document.documentElement.classList.toggle("dark");
+      });
+    }
+    // Chart rendering is handled dynamically in the next script block.
+  </script>
+  <script>
+    // Mobile Sidebar Toggle
+    const mobileMenuButton = document.getElementById("mobileMenuButton");
+    const mobileSidebar = document.getElementById("mobileSidebar");
+    const mobileSidebarOverlay = document.getElementById("mobileSidebarOverlay");
+    const closeMobileSidebar = document.getElementById("closeMobileSidebar");
+
+    function openMobileSidebar() {
+      mobileSidebar.classList.remove("-translate-x-full");
+      mobileSidebarOverlay.classList.add("active");
+    }
+    function closeMobileSidebarFunc() {
+      mobileSidebar.classList.add("-translate-x-full");
+      mobileSidebarOverlay.classList.remove("active");
+    }
+
+    mobileMenuButton.addEventListener("click", openMobileSidebar);
+    closeMobileSidebar.addEventListener("click", closeMobileSidebarFunc);
+    mobileSidebarOverlay.addEventListener("click", closeMobileSidebarFunc);
+
+    // Fetch backend data
+    async function fetchDashboardData() {
+      try {
+        const response = await fetch('http://localhost:3001/api/dashboard');
+        if (!response.ok) throw new Error('Network response was not ok');
+        return await response.json();
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+        return null;
+      }
+    }
+
+    async function initializeDashboard() {
+      const data = await fetchDashboardData();
+      if (!data) return;
+
+      updateKPIs(data);
+
+      const inventoryCtx = document.getElementById('inventoryTurnoverChart').getContext('2d');
+      renderInventoryTurnoverChart(inventoryCtx, data.inventoryTurnover);
+
+      const orderShipmentCtx = document.getElementById('orderShipmentComparisonChart').getContext('2d');
+      renderOrdersVsShipmentsChart(orderShipmentCtx, data.ordersVsShipments);
+    }
+
+
+
+
+    // Update KPI cards with live data
+    function updateKPIs(data) {
+      document.getElementById('totalOrdersTitle').textContent = data.totalOrders.toLocaleString();
+      document.getElementById('inventoryValueTitle').textContent = data.inventoryValue.toLocaleString() + ' INR';
+      document.getElementById('pendingShipmentsTitle').textContent = data.pendingShipments.toLocaleString();
+      document.getElementById('supplierPerformanceTitle').textContent = data.supplierPerformance + '%';
+      document.getElementById('inventoryTurnoverTitle').textContent = data.inventoryTurnover + '%';
+    }
+
+    // Render Inventory Turnover Chart dynamically
+    function renderInventoryTurnoverChart(ctx, data) {
+      const labels = data.map(d => d.month);
+      const dataset = data.map(d => d.quantity);
+
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Inventory',
+            data: dataset,
+            borderColor: 'blue',
+            fill: false,
+          }],
+        },
+      });
+    }
+
+    // Render Orders vs Shipments Chart dynamically
+    function renderOrdersVsShipmentsChart(ctx, data) {
+      const labels = data.map(d => (new Date(d.day)).toLocaleDateString());
+      const ordersData = data.map(d => d.orders);
+      const shipmentsData = data.map(d => d.shipments);
+
+      return new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Orders',
+              data: ordersData,
+              backgroundColor: 'green',
+            },
+            {
+              label: 'Shipments',
+              data: shipmentsData,
+              backgroundColor: 'orange',
+            },
+          ],
+        },
+      });
+    }
+    // SUPPLIERS
+    async function loadSuppliers() {
+      const res = await fetch('http://localhost:3001/api/suppliers');
+      const suppliers = await res.json();
+      let html = '<table border="1"><tr><th>ID</th><th>Name</th><th>Contact</th><th>Edit</th></tr>';
+      suppliers.forEach(s => {
+        html += `<tr>
+      <td>${s.supplier_id}</td>
+      <td>${s.name}</td>
+      <td>${s.contact_info}</td>
+      <td><button onclick="openEditSupplier(${s.supplier_id}, '${s.name}', '${s.contact_info}')">Edit</button></td>
+    </tr>`;
+      });
+      html += '</table>';
+      document.getElementById('suppliersTable').innerHTML = html;
+    }
+
+    function openEditSupplier(id, name, contact) {
+      document.getElementById('editSupplierId').value = id;
+      document.getElementById('editSupplierName').value = name;
+      document.getElementById('editSupplierContact').value = contact;
+      document.getElementById('editSupplierSection').style.display = 'block';
+    }
+
+    document.getElementById('editSupplierForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const id = document.getElementById('editSupplierId').value;
+      const name = document.getElementById('editSupplierName').value;
+      const contact_info = document.getElementById('editSupplierContact').value;
+      const res = await fetch(`http://localhost:3001/api/suppliers/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, contact_info }),
+      });
+      const data = await res.json();
+      document.getElementById('supplierEditMessage').textContent = data.message;
+      loadSuppliers();
+      this.parentElement.style.display = 'none';
+    });
+
+    // ORDERS
+    async function loadOrders() {
+      const res = await fetch('http://localhost:3001/api/orders');
+      const orders = await res.json();
+      let html = '<table border="1"><tr><th>ID</th><th>Customer</th><th>Order Date</th><th>Status</th><th>Edit</th></tr>';
+      orders.forEach(o => {
+        html += `<tr>
+      <td>${o.order_id}</td>
+      <td>${o.customer_name}</td>
+      <td>${o.order_date}</td>
+      <td>${o.status}</td>
+      <td><button onclick="openEditOrder(${o.order_id}, '${o.customer_name}', '${o.status}')">Edit</button></td>
+    </tr>`;
+      });
+      html += '</table>';
+      document.getElementById('ordersTable').innerHTML = html;
+    }
+
+    function openEditOrder(id, customer, status) {
+      document.getElementById('editOrderId').value = id;
+      document.getElementById('editOrderCustomer').value = customer;
+      document.getElementById('editOrderStatus').value = status;
+      document.getElementById('editOrderSection').style.display = 'block';
+    }
+
+    document.getElementById('editOrderForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const id = document.getElementById('editOrderId').value;
+      const customer_name = document.getElementById('editOrderCustomer').value;
+      const status = document.getElementById('editOrderStatus').value;
+      const res = await fetch(`http://localhost:3001/api/orders/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer_name, status }),
+      });
+      const data = await res.json();
+      document.getElementById('orderEditMessage').textContent = data.message;
+      loadOrders();
+      this.parentElement.style.display = 'none';
+    });
+
+    // Form Event Handlers
+    document.addEventListener('DOMContentLoaded', function() {
+      // Inventory Form Submission
+      const inventoryForm = document.getElementById('inventoryForm');
+      if (inventoryForm) {
+        inventoryForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          const productId = parseInt(document.getElementById('productId').value, 10);
+          const warehouse = document.getElementById('warehouse').value;
+          const quantity = parseInt(document.getElementById('quantity').value, 10);
+          try {
+            const response = await fetch('http://localhost:3001/api/inventory', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ productId, warehouse, quantity })
+            });
+            const data = await response.json();
+            document.getElementById('formMessage').textContent = data.message || 'Inventory added successfully!';
+            this.reset();
+            await initializeDashboard();
+          } catch (error) {
+            document.getElementById('formMessage').textContent = 'Error adding inventory. Please try again.';
+          }
+        });
+      }
+
+      // Order Form Logic
+      const addProductBtn = document.getElementById('addProductBtn');
+      if (addProductBtn) {
+        addProductBtn.addEventListener('click', function () {
+          const container = document.getElementById('orderProducts');
+          const div = document.createElement('div');
+          div.className = 'flex gap-2';
+          div.innerHTML = `<input type="number" placeholder="Product ID" class="orderProductId border rounded px-2 py-1" required />
+            <input type="number" placeholder="Quantity" class="orderProductQty border rounded px-2 py-1" required />`;
+          container.appendChild(div);
+        });
+      }
+
+      const orderForm = document.getElementById('orderForm');
+      if (orderForm) {
+        orderForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          const customerName = document.getElementById('customerName').value;
+          const orderDate = document.getElementById('orderDate').value;
+          const status = document.getElementById('status').value;
+          const productIds = Array.from(document.querySelectorAll('.orderProductId')).map(input => parseInt(input.value, 10));
+          const quantities = Array.from(document.querySelectorAll('.orderProductQty')).map(input => parseInt(input.value, 10));
+          const products = productIds.map((id, idx) => ({ productId: id, quantity: quantities[idx] }));
+          try {
+            const response = await fetch('http://localhost:3001/api/orders', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ customerName, orderDate, status, products })
+            });
+            const data = await response.json();
+            document.getElementById('orderFormMessage').textContent = data.message || 'Order added successfully!';
+            this.reset();
+            const container = document.getElementById('orderProducts');
+            while (container.children.length > 1) container.removeChild(container.lastChild);
+            await initializeDashboard();
+          } catch (error) {
+            document.getElementById('orderFormMessage').textContent = 'Error adding order. Please try again.';
+          }
+        });
+      }
+
+      // Product Form Submission
+      const productForm = document.getElementById('productForm');
+      if (productForm) {
+        productForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+          const name = document.getElementById('productName').value;
+          const description = document.getElementById('productDescription').value;
+          const cost_price = parseFloat(document.getElementById('productPrice').value);
+          const supplier_id = parseInt(document.getElementById('productSupplierId').value, 10);
+          try {
+            const response = await fetch('http://localhost:3001/api/products', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, description, cost_price, supplier_id })
+            });
+            const data = await response.json();
+            document.getElementById('productFormMessage').textContent = data.message || 'Product added successfully!';
+            this.reset();
+          } catch (error) {
+            document.getElementById('productFormMessage').textContent = 'Error adding product. Please try again.';
+          }
+        });
+      }
+    });
+
+    // Initial load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadSuppliers();
+      loadOrders();
+      initializeDashboard();
+    });
+
+    async function loadWarehouses() {
+      const res = await fetch('http://localhost:3001/api/warehouses');
+      const warehouses = await res.json();
+      const ul = document.getElementById('warehousesList');
+      ul.innerHTML = warehouses.map(wh => `<li>${wh}</li>`).join('');
+    }
+
+    async function loadShipmentsTable() {
+      const res = await fetch('http://localhost:3001/api/shipments');
+      const data = await res.json();
+      let table = '<table class="min-w-full text-sm text-left"><thead><tr><th>ID</th><th>Order ID</th><th>Shipped Date</th><th>Delivery Date</th><th>Status</th><th>Carrier</th></tr></thead><tbody>';
+      if (data.length === 0) {
+        table += '<tr><td colspan="6" class="text-center py-4">No shipment data</td></tr>';
+      } else {
+        for (const row of data) {
+          table += `<tr>
+        <td>${row.shipment_id}</td>
+        <td>${row.order_id}</td>
+        <td>${row.shipped_date}</td>
+        <td>${row.delivery_date}</td>
+        <td>${row.status}</td>
+        <td>${row.carrier}</td>
+      </tr>`;
+        }
+      }
+      table += '</tbody></table>';
+      document.getElementById('shipmentsTableContainer').innerHTML = table;
+    }
+
+
+
+    
+
+  </script>
+</body>
+
+</html>
